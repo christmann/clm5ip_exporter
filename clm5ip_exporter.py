@@ -102,7 +102,7 @@ def main():
       sys.stderr.write("Usage: clm5ip_exporter.py 192.168.0.162\n")
       exit(1)
     REGISTRY.register(Clm5ipCollector(sys.argv[1]))
-    start_http_server(9819)
+    start_http_server(9820)
     while True:
       time.sleep(1)
   except KeyboardInterrupt:
