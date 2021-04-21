@@ -12,6 +12,6 @@ CLM5IP power panel exporter for prometheus.io, written in python.
 
 ## Installation
 
-    git clone git@github.com:christmann/clm5ip_exporter.git
+    git clone https://github.com/christmann/clm5ip_exporter.git
     cd clm5ip_exporter
     pip install -r requirements.txt
