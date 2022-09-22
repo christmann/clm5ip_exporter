@@ -9,13 +9,7 @@ from prometheus_client.core import GaugeMetricFamily, REGISTRY
 
 class Clm5ipCollector(object):
   def __init__(self, target):
-    try:
-      self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      self._socket.connect((target, 10001))
-    except ConnectionError as err:
-      sys.stderr.write("Could not connect to CLM5IP: {0}\n".format(err))
-      exit(2)
-
+    self._target = target
     info = self.executeCommand("i").split(";")
     if (info[0] != "CLM5IP"):
       sys.stderr.write("Device did not report as CLM5IP, but instead as '" + info[0] + "'\n")
@@ -82,13 +76,23 @@ class Clm5ipCollector(object):
     return ret[0]
 
   def executeCommand(self, command):
-    self._socket.send((command + "\r\n").encode())
+    try:
+      sck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      sck.connect((self._target, 10001))
+    except socket.error as err:
+      sys.stderr.write("Could not connect to CLM5IP {0}: {1}\n".format(self._target, err))
+      exit(2)
+
+    sck.send((command + "\r\n").encode())
     buffer = bytearray()
     while True:
-      chunk = self._socket.recv(16)
+      chunk = sck.recv(16)
       buffer.extend(chunk)
       if b'\n' in chunk or not chunk:
         break
+    sck.shutdown(socket.SHUT_RDWR)
+    sck.close()
+    time.sleep(0.1)
     firstline = buffer[:buffer.find(b'\r\n')].decode()
     if firstline == "" or "unknown" in firstline:
       sys.stderr.write("Command '" + command + "' could not be executed\n")
