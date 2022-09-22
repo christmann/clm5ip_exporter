@@ -39,7 +39,11 @@ class Clm5ipCollector(object):
     analogIn = GaugeMetricFamily('clm5ip_analog_in_ratio', 'Analog input', labels=["input"])
     digitalIn = GaugeMetricFamily('clm5ip_digital_in_status', 'Digital input (1 = On)', labels=["input"])
 
-    data = self.executeCommand("get data").replace(",", ".").split(";")
+    d = self.executeCommand("get data")
+    if d == "":
+      sys.stderr.write("Received no data, device in use by other client?\n")
+      return
+    data = d.replace(",", ".").split(";")
     if len(data) != 40:
       sys.stderr.write("Received invalid data, expected 40 fields but got " + str(len(data)) + "\n")
       return
@@ -81,7 +85,7 @@ class Clm5ipCollector(object):
       sck.connect((self._target, 10001))
     except socket.error as err:
       sys.stderr.write("Could not connect to CLM5IP {0}: {1}\n".format(self._target, err))
-      exit(2)
+      return ""
 
     sck.send((command + "\r\n").encode())
     buffer = bytearray()
