@@ -1,0 +1,11 @@
+[Unit]
+Description=CLM5IP Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=prometheus
+ExecStart=/opt/clm5ip_exporter/clm5ip_exporter.py x.x.x.x
+
+[Install]
+WantedBy=default.target
